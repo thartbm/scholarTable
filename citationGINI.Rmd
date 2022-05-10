@@ -1,0 +1,81 @@
+---
+title: "Lab citation GINI"
+author: "Marius 't Hart"
+date: "10/05/2022"
+output: html_document
+---
+
+Load libraries
+
+```{r}
+library('scholar')
+library('ineq')
+library('formattable')
+library('kableExtra')
+```
+
+Read profiles from our lab members:
+
+```{r}
+
+users <- c('1W8ODjAAAAAJ', # marius
+           'aZNOEDUAAAAJ', # denise
+           'PsMlGM0AAAAJ', # jennifer
+           'xdwzYb8AAAAJ', # raphael
+           'RHgSyaAAAAAJ', # shanaathanan
+           'vmNcivAAAAAJ', # holly
+           'SbpVBVQAAAAJ'  # laura 
+          )
+
+name <- c()
+h_index <- c()
+
+for (u in users) {
+  
+  profile <- scholar::get_profile(u)
+  
+  name <- c(name, profile$name)
+  h_index <- c(h_index, profile$h_index)
+  
+}
+
+df <- data.frame(name, h_index)
+
+```
+
+Calculate GINI coefficient:
+
+```{r}
+GINI <- ineq::ineq(df$h_index)
+```
+
+Format data frame:
+
+```{r}
+df <- df[order(df$h_index, decreasing=TRUE),]
+
+names(df) <- c(' ','H-index')
+row.names(df) <- NULL
+```
+
+Make a nice table:
+
+```{r}
+customGreen0 = "#DeF7E9"
+customGreen = "#71CA97"
+customRed = "#ff7f7f"
+
+myff <- formattable::formattable(df, 
+                                 align=c('l','c'), 
+                                 list( `Indicator Name` = formatter("span", 
+                                                                    style = ~ style(color = "grey",
+                                                                                    font.weight = "bold")),
+                                       #`H-index`= color_tile(customGreen, customGreen0)
+                                       `H-index` = color_bar(customRed)
+                                       ))
+
+myff
+
+```
+
+# GINI coefficient: 0.5483871
